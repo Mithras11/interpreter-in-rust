@@ -31,7 +31,7 @@ pub enum TokenType {
     Rbrace,
 
     Function,
-    Let,
+    Variable,
 }
 
 //TODO: use std::fmt{...}
@@ -52,7 +52,16 @@ impl std::fmt::Display for TokenType {
             TokenType::Lbrace => write!(f, "{{"),
             TokenType::Rbrace => write!(f, "}}"),
             TokenType::Function => write!(f, "Function"),
-            TokenType::Let => write!(f, "Let"),
+            TokenType::Variable => write!(f, "Variable"),
         }
+    }
+}
+
+pub fn lookup_identifier(identifier: &String) -> TokenType {
+    //TODO use static str instead of str?
+    match identifier.as_str() {
+        "func" => TokenType::Function,
+        "var" => TokenType::Variable,
+        _ => TokenType::Identifier
     }
 }
