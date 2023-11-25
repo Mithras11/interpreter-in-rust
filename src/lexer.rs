@@ -1,4 +1,4 @@
-use crate::token::{Token, TokenKind};
+use crate::token::{Token, TokenType};
 
 struct Lexer {
     input: Vec<char>,
@@ -31,17 +31,17 @@ impl Lexer {
     fn next_token(&mut self) -> Token {
         self.read_char();
         let token = match self.curr_char {
-            '=' => Token::new(TokenKind::Assign, self.curr_char),
-            '+' => Token::new(TokenKind::Plus, self.curr_char),
-            '-' => Token::new(TokenKind::Minus, self.curr_char),
-            '(' => Token::new(TokenKind::Lparen, self.curr_char),
-            ')' => Token::new(TokenKind::Rparen, self.curr_char),
-            '{' => Token::new(TokenKind::Lbrace, self.curr_char),
-            '}' => Token::new(TokenKind::Rbrace, self.curr_char),
-            ',' => Token::new(TokenKind::Comma, self.curr_char),
-            ';' => Token::new(TokenKind::Semicolon, self.curr_char),
-            '\0' => Token::new(TokenKind::EOF, self.curr_char),
-            _ => Token::new(TokenKind::Illegal, self.curr_char),
+            '=' => Token::new(TokenType::Assign, self.curr_char.to_string()),
+            '+' => Token::new(TokenType::Plus, self.curr_char.to_string()),
+            '-' => Token::new(TokenType::Minus, self.curr_char.to_string()),
+            '(' => Token::new(TokenType::Lparen, self.curr_char.to_string()),
+            ')' => Token::new(TokenType::Rparen, self.curr_char.to_string()),
+            '{' => Token::new(TokenType::Lbrace, self.curr_char.to_string()),
+            '}' => Token::new(TokenType::Rbrace, self.curr_char.to_string()),
+            ',' => Token::new(TokenType::Comma, self.curr_char.to_string()),
+            ';' => Token::new(TokenType::Semicolon, self.curr_char.to_string()),
+            '\0' => Token::new(TokenType::EOF, "".to_string()),
+            _ => Token::new(TokenType::Illegal, self.curr_char.to_string()),
         };
         token
     }
@@ -52,7 +52,7 @@ impl Lexer {
 #[cfg(test)]
 mod test {
     use crate::lexer::Lexer;
-    use crate::token::{Token, TokenKind};
+    use crate::token::{Token, TokenType};
 
     #[test]
     fn test_next_token() {
@@ -60,44 +60,44 @@ mod test {
 
         let expected: Vec<Token> = vec![
             Token {
-                kind: TokenKind::Assign,
-                literal: "=".to_string(), //TODO: check if String::from shou;d be used instead
+                t_type: TokenType::Assign,
+                literal: "=".to_string(), //TODO: check if String::from should be used instead
             },
             Token {
-                kind: TokenKind::Plus,
+                t_type: TokenType::Plus,
                 literal: "+".to_string(),
             },
             Token {
-                kind: TokenKind::Minus,
+                t_type: TokenType::Minus,
                 literal: "-".to_string(),
             },
             Token {
-                kind: TokenKind::Lparen,
+                t_type: TokenType::Lparen,
                 literal: "(".to_string(),
             },
             Token {
-                kind: TokenKind::Rparen,
+                t_type: TokenType::Rparen,
                 literal: ")".to_string(),
             },
             Token {
-                kind: TokenKind::Lbrace,
+                t_type: TokenType::Lbrace,
                 literal: "{".to_string(),
             },
             Token {
-                kind: TokenKind::Rbrace,
+                t_type: TokenType::Rbrace,
                 literal: "}".to_string(),
             },
             Token {
-                kind: TokenKind::Comma,
+                t_type: TokenType::Comma,
                 literal: ",".to_string(),
             },
             Token {
-                kind: TokenKind::Semicolon,
+                t_type: TokenType::Semicolon,
                 literal: ";".to_string(),
             },
             Token {
-                kind: TokenKind::EOF,
-                literal: "\0".to_string(),
+                t_type: TokenType::EOF,
+                literal: "".to_string(),
             },
         ];
 
@@ -105,9 +105,9 @@ mod test {
 
         for (_, expected_token) in expected.into_iter().enumerate() {
             let received_token = lexer.next_token();
-            assert_eq!(expected_token.kind, received_token.kind,
+            assert_eq!(expected_token.t_type, received_token.t_type,
                        "tests[(idx)] - token type is wrong, expected={}, got={}",
-                       expected_token.kind, received_token.kind
+                       expected_token.t_type, received_token.t_type
             );
             assert_eq!(expected_token.literal, received_token.literal,
                        "tests[(idx)] - token literal is wrong, expected={}, got={}",

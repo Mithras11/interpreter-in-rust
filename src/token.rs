@@ -1,17 +1,17 @@
 #[derive(PartialEq, Debug)]
 pub struct Token {
-    pub kind: TokenKind,
+    pub t_type: TokenType,
     pub literal: String, //TODO: use &'static str?
 }
 
 impl Token {
-    pub fn new(kind: TokenKind, ch: char) -> Token {
-        Token { kind, literal: ch.to_string() }
+    pub fn new(t_type: TokenType, literal: String) -> Token {
+        Token { t_type, literal }
     }
 }
 
 #[derive(PartialEq, Debug)]
-pub enum TokenKind {
+pub enum TokenType {
     Illegal,
     EOF,
 
@@ -35,24 +35,24 @@ pub enum TokenKind {
 }
 
 //TODO: use std::fmt{...}
-impl std::fmt::Display for TokenKind {
+impl std::fmt::Display for TokenType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            TokenKind::Illegal => write!(f, "Illegal"),
-            TokenKind::EOF => write!(f, "EOF"),
-            TokenKind::Identifier => write!(f, "Identifier"),
-            TokenKind::Integer => write!(f, "Integer"),
-            TokenKind::Assign => write!(f, "="),
-            TokenKind::Plus => write!(f, "+"),
-            TokenKind::Minus => write!(f, "-"),
-            TokenKind::Comma => write!(f, ","),
-            TokenKind::Semicolon => write!(f, ";"),
-            TokenKind::Lparen => write!(f, "("),
-            TokenKind::Rparen => write!(f, ")"),
-            TokenKind::Lbrace => write!(f, "{{"),
-            TokenKind::Rbrace => write!(f, "}}"),
-            TokenKind::Function => write!(f, "Function"),
-            TokenKind::Let => write!(f, "Let"),
+            TokenType::Illegal => write!(f, "Illegal"),
+            TokenType::EOF => write!(f, "EOF"),
+            TokenType::Identifier => write!(f, "Identifier"),
+            TokenType::Integer => write!(f, "Integer"),
+            TokenType::Assign => write!(f, "="),
+            TokenType::Plus => write!(f, "+"),
+            TokenType::Minus => write!(f, "-"),
+            TokenType::Comma => write!(f, ","),
+            TokenType::Semicolon => write!(f, ";"),
+            TokenType::Lparen => write!(f, "("),
+            TokenType::Rparen => write!(f, ")"),
+            TokenType::Lbrace => write!(f, "{{"),
+            TokenType::Rbrace => write!(f, "}}"),
+            TokenType::Function => write!(f, "Function"),
+            TokenType::Let => write!(f, "Let"),
         }
     }
 }
