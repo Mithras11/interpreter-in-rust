@@ -1,58 +1,97 @@
 #[derive(PartialEq, Debug)]
 pub struct Token {
-    pub kind: TokenKind,
+    pub t_type: TokenType,
     pub literal: String, //TODO: use &'static str?
 }
 
-impl Token {
-    pub fn new(kind: TokenKind, ch: char) -> Token {
-        Token { kind, literal: ch.to_string() }
-    }
-}
-
 #[derive(PartialEq, Debug)]
-pub enum TokenKind {
+pub enum TokenType {
     Illegal,
     EOF,
 
     Identifier,
     Integer,
 
+    // math operators
     Assign,
     Plus,
     Minus,
+    //comparisons TODO: rename
+    GT,
+    LT,
+    EQ,
+    NE,
+    GE,
+    LE,
 
     Comma,
     Semicolon,
+    Bang,
+    Asterisk,
+    Slash,
 
     Lparen,
     Rparen,
     Lbrace,
     Rbrace,
 
+    // keywords
     Function,
-    Let,
+    Variable,
+    True,
+    False,
+    If,
+    Else,
+    Return,
 }
 
 //TODO: use std::fmt{...}
-impl std::fmt::Display for TokenKind {
+impl std::fmt::Display for TokenType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            TokenKind::Illegal => write!(f, "Illegal"),
-            TokenKind::EOF => write!(f, "EOF"),
-            TokenKind::Identifier => write!(f, "Identifier"),
-            TokenKind::Integer => write!(f, "Integer"),
-            TokenKind::Assign => write!(f, "="),
-            TokenKind::Plus => write!(f, "+"),
-            TokenKind::Minus => write!(f, "-"),
-            TokenKind::Comma => write!(f, ","),
-            TokenKind::Semicolon => write!(f, ";"),
-            TokenKind::Lparen => write!(f, "("),
-            TokenKind::Rparen => write!(f, ")"),
-            TokenKind::Lbrace => write!(f, "{{"),
-            TokenKind::Rbrace => write!(f, "}}"),
-            TokenKind::Function => write!(f, "Function"),
-            TokenKind::Let => write!(f, "Let"),
+            TokenType::Illegal => write!(f, "Illegal"),
+            TokenType::EOF => write!(f, "EOF"),
+            TokenType::Identifier => write!(f, "Identifier"),
+            TokenType::Integer => write!(f, "Integer"),
+            TokenType::Assign => write!(f, "="),
+            TokenType::Plus => write!(f, "+"),
+            TokenType::Minus => write!(f, "-"),
+            TokenType::GT => write!(f, ">"),
+            TokenType::LT => write!(f, "<"),
+            TokenType::EQ => write!(f, "=="),
+            TokenType::NE => write!(f, "!="),
+            TokenType::GE => write!(f, ">="),
+            TokenType::LE => write!(f, "<="),
+            TokenType::Comma => write!(f, ","),
+            TokenType::Semicolon => write!(f, ";"),
+            TokenType::Bang => write!(f, "!"),
+            TokenType::Asterisk => write!(f, "*"),
+            TokenType::Slash => write!(f, "/"),
+            TokenType::Lparen => write!(f, "("),
+            TokenType::Rparen => write!(f, ")"),
+            TokenType::Lbrace => write!(f, "{{"),
+            TokenType::Rbrace => write!(f, "}}"),
+            TokenType::Function => write!(f, "Function"),
+            TokenType::Variable => write!(f, "Variable"),
+            TokenType::True => write!(f, "True"),
+            TokenType::False => write!(f, "False"),
+            TokenType::If => write!(f, "If"),
+            TokenType::Else => write!(f, "Else"),
+            TokenType::Return => write!(f, "Return"),
         }
+    }
+}
+
+pub fn lookup_identifier(identifier: &String) -> TokenType {
+    //TODO use static str instead of str?
+    match identifier.as_str() {
+        "func" => TokenType::Function,
+        "var" => TokenType::Variable,
+        "true" => TokenType::True,
+        "false" => TokenType::False,
+        "if" => TokenType::If,
+        "else" => TokenType::Else,
+        "return" => TokenType::Return,
+        _ => TokenType::Identifier
     }
 }
