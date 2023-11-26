@@ -43,46 +43,46 @@ impl Lexer {
             '=' => {
                 if self.peek_char() == '=' {
                     self.read_char();
-                    Token { t_type: TokenType::EQ, literal: "==".to_string() }
+                    Token { t_type: TokenType::Equal, literal: "==".to_string() }
                 } else {
                     Token { t_type: TokenType::Assign, literal: self.processed_char.to_string() }
                 }
             }
             '+' => Token { t_type: TokenType::Plus, literal: self.processed_char.to_string() },
             '-' => Token { t_type: TokenType::Minus, literal: self.processed_char.to_string() },
+            '/' => Token { t_type: TokenType::Slash, literal: self.processed_char.to_string() },
+            '*' => Token { t_type: TokenType::Asterisk, literal: self.processed_char.to_string() },
             '>' => {
                 if self.peek_char() == '=' {
                     self.read_char();
-                    Token { t_type: TokenType::GE, literal: ">=".to_string() }
+                    Token { t_type: TokenType::GreaterOrEqual, literal: ">=".to_string() }
                 } else {
-                    Token { t_type: TokenType::GT, literal: self.processed_char.to_string() }
+                    Token { t_type: TokenType::GreaterThan, literal: self.processed_char.to_string() }
                 }
             }
             '<' => {
                 if self.peek_char() == '=' {
                     self.read_char();
-                    Token { t_type: TokenType::LE, literal: "<=".to_string() }
+                    Token { t_type: TokenType::LessOrEqual, literal: "<=".to_string() }
                 } else {
-                    Token { t_type: TokenType::LT, literal: self.processed_char.to_string() }
+                    Token { t_type: TokenType::LessThan, literal: self.processed_char.to_string() }
                 }
             }
-            '(' => Token { t_type: TokenType::Lparen, literal: self.processed_char.to_string() },
-            ')' => Token { t_type: TokenType::Rparen, literal: self.processed_char.to_string() },
-            '{' => Token { t_type: TokenType::Lbrace, literal: self.processed_char.to_string() },
-            '}' => Token { t_type: TokenType::Rbrace, literal: self.processed_char.to_string() },
+            '(' => Token { t_type: TokenType::OpenParenthesis, literal: self.processed_char.to_string() },
+            ')' => Token { t_type: TokenType::CloseParenthesis, literal: self.processed_char.to_string() },
+            '{' => Token { t_type: TokenType::OpenBrace, literal: self.processed_char.to_string() },
+            '}' => Token { t_type: TokenType::CloseBrace, literal: self.processed_char.to_string() },
             ',' => Token { t_type: TokenType::Comma, literal: self.processed_char.to_string() },
             ';' => Token { t_type: TokenType::Semicolon, literal: self.processed_char.to_string() },
             '!' => {
                 if self.peek_char() == '=' {
                     self.read_char();
-                    Token { t_type: TokenType::NE, literal: "!=".to_string() }
+                    Token { t_type: TokenType::NotEqual, literal: "!=".to_string() }
                 } else {
                     Token { t_type: TokenType::Bang, literal: self.processed_char.to_string() }
                 }
             }
-            '/' => Token { t_type: TokenType::Slash, literal: self.processed_char.to_string() },
-            '*' => Token { t_type: TokenType::Asterisk, literal: self.processed_char.to_string() },
-            '\0' => Token { t_type: TokenType::EOF, literal: "".to_string() },
+            '\0' => Token { t_type: TokenType::EndOfFile, literal: "".to_string() },
             _ => {
                 return if Lexer::is_letter(self.processed_char) {
                     let literal: String = self.read_identifier();
@@ -90,7 +90,11 @@ impl Lexer {
                     Token { t_type, literal }
                 } else if Lexer::is_digit(self.processed_char) {
                     let literal: String = self.read_number();
-                    let t_type: TokenType = TokenType::Integer;
+                    let t_type: TokenType = if literal.contains(".") {
+                        TokenType::Double
+                    } else {
+                        TokenType::Integer
+                    };
                     Token { t_type, literal }
                 } else {
                     Token { t_type: TokenType::Illegal, literal: self.processed_char.to_string() }
@@ -120,8 +124,10 @@ impl Lexer {
         identifier
     }
 
+    //TODO:rename
+    //TODO: extract '.' and '_'
     fn is_digit(ch: char) -> bool {
-        ch.is_numeric()
+        ch.is_numeric() || ch == '.' || ch == '_'
     }
 
     fn read_number(&mut self) -> String {
@@ -130,6 +136,12 @@ impl Lexer {
         while Lexer::is_digit(self.peek_char()) {
             self.read_char();
             number.push(self.processed_char);
+        }
+        // if number.ends_with(".") || number.ends_with("_") {
+        //TODO: verify pattern -> slice of chars vs array?
+        if number.ends_with(['.', '_']) {
+            //TODO: handle panic and add unit test
+            panic!("invalid input {number}");
         }
         number
     }
@@ -160,27 +172,27 @@ mod test {
                 literal: "-".to_string(),
             },
             Token {
-                t_type: TokenType::LT,
+                t_type: TokenType::LessThan,
                 literal: "<".to_string(),
             },
             Token {
-                t_type: TokenType::GT,
+                t_type: TokenType::GreaterThan,
                 literal: ">".to_string(),
             },
             Token {
-                t_type: TokenType::Lparen,
+                t_type: TokenType::OpenParenthesis,
                 literal: "(".to_string(),
             },
             Token {
-                t_type: TokenType::Rparen,
+                t_type: TokenType::CloseParenthesis,
                 literal: ")".to_string(),
             },
             Token {
-                t_type: TokenType::Lbrace,
+                t_type: TokenType::OpenBrace,
                 literal: "{".to_string(),
             },
             Token {
-                t_type: TokenType::Rbrace,
+                t_type: TokenType::CloseBrace,
                 literal: "}".to_string(),
             },
             Token {
@@ -204,7 +216,7 @@ mod test {
                 literal: "*".to_string(),
             },
             Token {
-                t_type: TokenType::EOF,
+                t_type: TokenType::EndOfFile,
                 literal: "".to_string(),
             },
         ];
@@ -227,8 +239,8 @@ mod test {
     fn test_next_token_simple_code() {
         //TODO: handle return keyword in func
         let input: &str = r#"
-        var first_num = 3;
-        var second_num = 5;
+        var first_num = 3_000_000;
+        var second_num = 5.1;
         var add = func(x, y) {
            return x + y;
         };
@@ -251,7 +263,7 @@ mod test {
             },
             Token {
                 t_type: TokenType::Integer,
-                literal: "3".to_string(),
+                literal: "3_000_000".to_string(),
             },
             Token {
                 t_type: TokenType::Semicolon,
@@ -271,8 +283,8 @@ mod test {
                 literal: "=".to_string(),
             },
             Token {
-                t_type: TokenType::Integer,
-                literal: "5".to_string(),
+                t_type: TokenType::Double,
+                literal: "5.1".to_string(),
             },
             Token {
                 t_type: TokenType::Semicolon,
@@ -296,7 +308,7 @@ mod test {
                 literal: "func".to_string(),
             },
             Token {
-                t_type: TokenType::Lparen,
+                t_type: TokenType::OpenParenthesis,
                 literal: "(".to_string(),
             },
             Token {
@@ -312,11 +324,11 @@ mod test {
                 literal: "y".to_string(),
             },
             Token {
-                t_type: TokenType::Rparen,
+                t_type: TokenType::CloseParenthesis,
                 literal: ")".to_string(),
             },
             Token {
-                t_type: TokenType::Lbrace,
+                t_type: TokenType::OpenBrace,
                 literal: "{".to_string(),
             },
             //fourth line
@@ -342,7 +354,7 @@ mod test {
             },
             //fifth line
             Token {
-                t_type: TokenType::Rbrace,
+                t_type: TokenType::CloseBrace,
                 literal: "}".to_string(),
             },
             Token {
@@ -367,7 +379,7 @@ mod test {
                 literal: "add".to_string(),
             },
             Token {
-                t_type: TokenType::Lparen,
+                t_type: TokenType::OpenParenthesis,
                 literal: "(".to_string(),
             },
             Token {
@@ -383,7 +395,7 @@ mod test {
                 literal: "second_num".to_string(),
             },
             Token {
-                t_type: TokenType::Rparen,
+                t_type: TokenType::CloseParenthesis,
                 literal: ")".to_string(),
             },
             Token {
@@ -466,7 +478,7 @@ mod test {
                 literal: "if".to_string(),
             },
             Token {
-                t_type: TokenType::Lparen,
+                t_type: TokenType::OpenParenthesis,
                 literal: "(".to_string(),
             },
             Token {
@@ -474,7 +486,7 @@ mod test {
                 literal: "a".to_string(),
             },
             Token {
-                t_type: TokenType::EQ,
+                t_type: TokenType::Equal,
                 literal: "==".to_string(),
             },
             Token {
@@ -482,11 +494,11 @@ mod test {
                 literal: "b".to_string(),
             },
             Token {
-                t_type: TokenType::Rparen,
+                t_type: TokenType::CloseParenthesis,
                 literal: ")".to_string(),
             },
             Token {
-                t_type: TokenType::Lbrace,
+                t_type: TokenType::OpenBrace,
                 literal: "{".to_string(),
             },
             //fourth line
@@ -504,7 +516,7 @@ mod test {
             },
             //fifth line
             Token {
-                t_type: TokenType::Rbrace,
+                t_type: TokenType::CloseBrace,
                 literal: "}".to_string(),
             },
             Token {
@@ -512,7 +524,7 @@ mod test {
                 literal: "else".to_string(),
             },
             Token {
-                t_type: TokenType::Lbrace,
+                t_type: TokenType::OpenBrace,
                 literal: "{".to_string(),
             },
             //sixth line
@@ -530,7 +542,7 @@ mod test {
             },
             //seventh line
             Token {
-                t_type: TokenType::Rbrace,
+                t_type: TokenType::CloseBrace,
                 literal: "}".to_string(),
             },
         ];
@@ -565,7 +577,7 @@ mod test {
                 literal: "x".to_string(),
             },
             Token {
-                t_type: TokenType::EQ,
+                t_type: TokenType::Equal,
                 literal: "==".to_string(),
             },
             Token {
@@ -582,7 +594,7 @@ mod test {
                 literal: "x".to_string(),
             },
             Token {
-                t_type: TokenType::NE,
+                t_type: TokenType::NotEqual,
                 literal: "!=".to_string(),
             },
             Token {
@@ -599,7 +611,7 @@ mod test {
                 literal: "x".to_string(),
             },
             Token {
-                t_type: TokenType::GE,
+                t_type: TokenType::GreaterOrEqual,
                 literal: ">=".to_string(),
             },
             Token {
@@ -616,7 +628,7 @@ mod test {
                 literal: "x".to_string(),
             },
             Token {
-                t_type: TokenType::LE,
+                t_type: TokenType::LessOrEqual,
                 literal: "<=".to_string(),
             },
             Token {

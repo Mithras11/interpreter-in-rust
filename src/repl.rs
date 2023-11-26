@@ -16,7 +16,7 @@ pub fn start(stdin: Stdin, mut stdout: Stdout) {
         let mut lexer = Lexer::new(input.as_str());
         loop {
             let token = lexer.next_token();
-            if token.t_type == TokenType::EOF {
+            if token.t_type == TokenType::EndOfFile {
                 break;
             }
             writeln!(stdout, "{token:?}").expect("unable to display token");
