@@ -1,11 +1,12 @@
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default, Clone)]
 pub struct Token {
     pub t_type: TokenType,
     pub literal: String, //TODO: use &'static str?
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default, Clone)]
 pub enum TokenType {
+    #[default]
     Illegal,
     EndOfFile,
 
