@@ -1,6 +1,6 @@
 use crate::token::{lookup_identifier, Token, TokenType};
 
-struct Lexer {
+pub struct Lexer {
     input: Vec<char>,
     curr_position: usize,
     next_position: usize,
@@ -36,7 +36,7 @@ impl Lexer {
         }
     }
 
-    fn next_token(&mut self) -> Token {
+    pub fn next_token(&mut self) -> Token {
         self.read_char();
         self.skip_whitespace();
         let token = match self.processed_char {
@@ -111,7 +111,7 @@ impl Lexer {
     }
 
     fn read_identifier(&mut self) -> String {
-        let mut identifier: String = String::new();
+        let mut identifier = String::new();
         identifier.push(self.processed_char);
         while Lexer::is_letter(self.peek_char()) {
             self.read_char();
@@ -125,7 +125,7 @@ impl Lexer {
     }
 
     fn read_number(&mut self) -> String {
-        let mut number: String = String::new();
+        let mut number = String::new();
         number.push(self.processed_char);
         while Lexer::is_digit(self.peek_char()) {
             self.read_char();
@@ -209,8 +209,7 @@ mod test {
             },
         ];
 
-        let mut lexer: Lexer = Lexer::new(input);
-
+        let mut lexer = Lexer::new(input);
         for (_, expected_token) in expected.into_iter().enumerate() {
             let received_token = lexer.next_token();
             assert_eq!(expected_token.t_type, received_token.t_type,
@@ -226,12 +225,12 @@ mod test {
 
     #[test]
     fn test_next_token_simple_code() {
-        //TODO: add return keyword to func
+        //TODO: handle return keyword in func
         let input: &str = r#"
         var first_num = 3;
         var second_num = 5;
         var add = func(x, y) {
-           x + y;
+           return x + y;
         };
         var result = add(first_num, second_num);
         "#;
@@ -322,6 +321,10 @@ mod test {
             },
             //fourth line
             Token {
+                t_type: TokenType::Return,
+                literal: "return".to_string(),
+            },
+            Token {
                 t_type: TokenType::Identifier,
                 literal: "x".to_string(),
             },
@@ -389,8 +392,7 @@ mod test {
             },
         ];
 
-        let mut lexer: Lexer = Lexer::new(input);
-
+        let mut lexer = Lexer::new(input);
         for (_, expected_token) in expected.into_iter().enumerate() {
             let received_token = lexer.next_token();
             assert_eq!(expected_token.t_type, received_token.t_type,
@@ -472,12 +474,8 @@ mod test {
                 literal: "a".to_string(),
             },
             Token {
-                t_type: TokenType::Assign,
-                literal: "=".to_string(),
-            },
-            Token {
-                t_type: TokenType::Assign,
-                literal: "=".to_string(),
+                t_type: TokenType::EQ,
+                literal: "==".to_string(),
             },
             Token {
                 t_type: TokenType::Identifier,
@@ -537,8 +535,7 @@ mod test {
             },
         ];
 
-        let mut lexer: Lexer = Lexer::new(input);
-
+        let mut lexer = Lexer::new(input);
         for (_, expected_token) in expected.into_iter().enumerate() {
             let received_token = lexer.next_token();
             assert_eq!(expected_token.t_type, received_token.t_type,
@@ -632,8 +629,7 @@ mod test {
             },
         ];
 
-        let mut lexer: Lexer = Lexer::new(input);
-
+        let mut lexer = Lexer::new(input);
         for (_, expected_token) in expected.into_iter().enumerate() {
             let received_token = lexer.next_token();
             assert_eq!(expected_token.t_type, received_token.t_type,
